@@ -44,3 +44,87 @@ surfaces, cream/Georgia-style editorial headings, amber actions, terracotta and
 sage cover treatments, compact rounded cards, persistent bottom navigation, and
 the floating Ask AI action. Run with `--dart-define=USE_REMOTE_API=true` to use
 the FastAPI book repository; otherwise the same screens use local mock data.
+
+## Neon PostgreSQL and Render deployment
+
+The backend is already configured for Neon through `DATABASE_URL`. Do not put
+the real connection string in Git, Flutter, `README.md`, or
+`backend/.env.example`. For local development, copy the example file and put
+the value only in `backend/.env`:
+
+```powershell
+Copy-Item backend\.env.example backend\.env
+```
+
+Set `DATABASE_URL` to the Neon **pooled** connection string. Both
+`postgres://...` and `postgresql://...` are accepted and normalized to the
+`asyncpg` driver. Also set a local-only `JWT_SECRET`.
+
+For Render, open **Dashboard -> bookhub-api -> Environment** and add:
+
+```text
+DATABASE_URL=<Neon pooled connection string>
+JWT_SECRET=<long random value>
+ENVIRONMENT=production
+CORS_ORIGINS=https://your-frontend-domain
+```
+
+Add the S3 variables there too when object storage is enabled:
+`AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+`AWS_REGION`, and `S3_BUCKET`. Never paste these values into source files.
+
+The repository root now contains the Dockerfile expected by a Render service
+whose root directory is `/`. The service must use **Docker** runtime,
+`Dockerfile Path: ./Dockerfile`, `Docker Context: .`, and health check path
+`/health`. The included `render.yaml` also runs `alembic upgrade head` before
+deployment. If the dashboard still shows an old commit such as `bd70960`,
+trigger **Manual Deploy -> Deploy latest commit** and confirm the deployed
+commit is the current `main` commit.
+
+Local backend commands:
+
+```powershell
+python -m venv backend\.venv
+backend\.venv\Scripts\Activate.ps1
+python -m pip install -r backend\requirements.txt
+Set-Location backend
+alembic upgrade head
+uvicorn app.main:app --reload --port 8000
+```
+
+Backend tests:
+
+```powershell
+Set-Location backend
+python -m pytest tests -q
+```
+
+Flutter unit, widget, and golden tests:
+
+```powershell
+flutter pub get
+flutter test
+flutter analyze
+```
+
+The golden baseline is `test/goldens/empty_state.png`. To intentionally update
+it after a visual change, run:
+
+```powershell
+flutter test --update-goldens test/golden_test.dart
+```
+
+The smoke integration test is in `integration_test/app_smoke_test.dart` and
+requires a connected device or emulator:
+
+```powershell
+flutter devices
+flutter test integration_test
+```
+
+Run the API-backed Flutter build with:
+
+```powershell
+flutter run --dart-define=USE_REMOTE_API=true `
+  --dart-define=API_BASE_URL=https://your-render-service.onrender.com
+```
