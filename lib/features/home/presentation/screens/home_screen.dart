@@ -23,19 +23,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final books = ref.watch(recommendationsProvider);
     return BookHubScaffold(
-      title: 'BookHub',
+      title: "Amara's library",
       selectedIndex: 0,
       floatingActionButton: AIButton(onPressed: () => context.push('/ai')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
         children: [
+          Text('Good evening,', style: Theme.of(context).textTheme.bodyLarge),
           Text(
-            'Your reading world',
+            "Amara's library",
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 6),
           Text(
-            'Find a story worth getting lost in.',
+            'Read. Listen. Belong.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 22),
@@ -50,6 +51,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 26),
           _ContinueCard(onTap: () => context.push('/reader/1')),
+          const SizedBox(height: 28),
+          Row(
+            children: const [
+              _StatCard(
+                icon: Icons.local_fire_department,
+                value: '12 days',
+                label: 'streak',
+              ),
+              SizedBox(width: 10),
+              _StatCard(icon: Icons.schedule, value: '48 min', label: 'today'),
+              SizedBox(width: 10),
+              _StatCard(
+                icon: Icons.check_box_outlined,
+                value: '23',
+                label: 'finished',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Card(
+            color: BookHubColors.gold,
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xffd49124),
+                child: Icon(Icons.monetization_on, color: Colors.black),
+              ),
+              title: const Text(
+                '1,240 coins',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: const Text(
+                '5 pages left in this chapter · 2/3 ads watched',
+                style: TextStyle(color: Colors.black87),
+              ),
+              trailing: FilledButton(
+                onPressed: () => context.push('/rewards'),
+                child: const Text('Earn'),
+              ),
+            ),
+          ),
           const SizedBox(height: 28),
           SectionHeader(
             title: 'Recommended for you',
@@ -79,22 +123,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(height: 26),
-          SectionHeader(title: 'Your activity'),
+          SectionHeader(
+            title: 'Trending now',
+            action: () => context.push('/discover'),
+          ),
           const SizedBox(height: 12),
-          Row(
-            children: const [
-              _StatCard(
-                icon: Icons.local_fire_department,
-                value: '7 days',
-                label: 'streak',
+          books.when(
+            loading: () => const SizedBox(
+              height: 190,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (_, __) => const EmptyState(
+              title: 'Offline mode',
+              message: 'Saved books are still available.',
+            ),
+            data: (items) => SizedBox(
+              height: 270,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: items.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (_, index) => BookCard(
+                  book: items[index],
+                  onTap: () => context.push('/books/${items[index].id}'),
+                ),
               ),
-              SizedBox(width: 12),
-              _StatCard(
-                icon: Icons.schedule,
-                value: '4.2h',
-                label: 'this week',
+            ),
+          ),
+          const SizedBox(height: 26),
+          SectionHeader(
+            title: 'Popular audiobooks',
+            action: () => context.push('/audiobooks'),
+          ),
+          Card(
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: BookHubColors.terracotta,
+                child: Icon(Icons.headphones, color: Colors.black),
               ),
-            ],
+              title: const Text('Project Hail Mary'),
+              subtitle: const Text('Andy Weir · 13h 46m'),
+              trailing: IconButton(
+                onPressed: () => context.push('/audiobook/player'),
+                icon: const Icon(
+                  Icons.play_circle,
+                  color: BookHubColors.gold,
+                  size: 36,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 26),
+          SectionHeader(
+            title: 'Community buzz',
+            action: () => context.push('/community'),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.groups),
+              title: const Text('Fantasy Lovers · 12.4k'),
+              subtitle: const Text(
+                'Is “The Salt Road” ending divisive? · 128 replies',
+              ),
+              onTap: () => context.push('/community'),
+            ),
           ),
         ],
       ),
@@ -107,7 +199,7 @@ class _ContinueCard extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Card(
-    color: BookHubColors.violet,
+    color: Theme.of(context).cardColor,
     child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -115,7 +207,23 @@ class _ContinueCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            const Icon(Icons.menu_book, color: Colors.white, size: 42),
+            Container(
+              width: 72,
+              height: 104,
+              decoration: BoxDecoration(
+                color: BookHubColors.gold,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: const Text(
+                'The\nSalt\nRoad',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Georgia',
+                ),
+              ),
+            ),
             const SizedBox(width: 16),
             const Expanded(
               child: Column(
@@ -123,13 +231,13 @@ class _ContinueCard extends StatelessWidget {
                 children: [
                   Text(
                     'Continue reading',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: BookHubColors.sage),
                   ),
                   SizedBox(height: 4),
                   Text(
                     'The Salt Road',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: BookHubColors.ink,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -137,14 +245,14 @@ class _ContinueCard extends StatelessWidget {
                   SizedBox(height: 10),
                   LinearProgressIndicator(
                     value: .62,
-                    color: Colors.white,
-                    backgroundColor: Colors.white30,
+                    color: BookHubColors.gold,
+                    backgroundColor: BookHubColors.muted,
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white),
+            FilledButton(onPressed: onTap, child: const Text('Resume')),
           ],
         ),
       ),

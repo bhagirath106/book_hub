@@ -48,3 +48,9 @@ class LibraryResponse(BaseModel):
 
 class RewardResponse(BaseModel):
     balance: int
+
+class RewardActionRequest(BaseModel):
+    reference: str = Field(min_length=1, max_length=255)
+
+class ProgressRequest(BaseModel):
+    progress: float = Field(ge=0, le=1)

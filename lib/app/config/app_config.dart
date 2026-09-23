@@ -4,4 +4,8 @@ class AppConfig {
     'API_BASE_URL',
     defaultValue: 'http://localhost:8000',
   );
+  static const useRemoteApi = bool.fromEnvironment(
+    'USE_REMOTE_API',
+    defaultValue: false,
+  );
 }

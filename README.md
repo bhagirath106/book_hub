@@ -38,3 +38,9 @@ The client is organized by feature under `lib/features`:
 
 The current zero-cost build uses mock/local data where backend endpoints are not
 yet available. `API_BASE_URL` remains the only frontend environment value.
+
+The frontend visual system follows the supplied BookHub export: warm charcoal
+surfaces, cream/Georgia-style editorial headings, amber actions, terracotta and
+sage cover treatments, compact rounded cards, persistent bottom navigation, and
+the floating Ask AI action. Run with `--dart-define=USE_REMOTE_API=true` to use
+the FastAPI book repository; otherwise the same screens use local mock data.

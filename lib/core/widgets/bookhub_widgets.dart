@@ -39,8 +39,30 @@ class BookCard extends StatelessWidget {
                 width: 142,
                 child: book.coverUrl == null
                     ? Container(
-                        color: BookHubColors.violet.withValues(alpha: .16),
-                        child: const Icon(Icons.menu_book, size: 44),
+                        color: Color(book.coverColor),
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              book.title,
+                              maxLines: 3,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'Georgia',
+                              ),
+                            ),
+                            Text(
+                              book.author.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
                       )
                     : Image.network(
                         book.coverUrl!,

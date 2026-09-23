@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 abstract final class BookHubColors {
-  static const violet = Color(0xff7667f5);
-  static const lavender = Color(0xffa79cff);
-  static const ink = Color(0xff17152b);
-  static const muted = Color(0xff77738e);
-  static const canvas = Color(0xfff8f7fc);
-  static const darkCanvas = Color(0xff12111b);
-  static const cardDark = Color(0xff201e2e);
+  static const violet = Color(0xffefa936);
+  static const lavender = Color(0xffffca68);
+  static const ink = Color(0xfff7eddf);
+  static const muted = Color(0xffb6a58c);
+  static const canvas = Color(0xfff8f0e4);
+  static const darkCanvas = Color(0xff120e0b);
+  static const cardDark = Color(0xff1f1a15);
   static const gold = Color(0xffffc857);
+  static const terracotta = Color(0xff985544);
+  static const sage = Color(0xff82b36c);
 }
 
 abstract final class BookHubTheme {
@@ -65,8 +67,12 @@ abstract final class BookHubTheme {
         headlineMedium: TextStyle(
           fontWeight: FontWeight.w800,
           letterSpacing: -.5,
+          fontFamily: 'Georgia',
         ),
-        titleLarge: TextStyle(fontWeight: FontWeight.w800),
+        titleLarge: TextStyle(
+          fontWeight: FontWeight.w800,
+          fontFamily: 'Georgia',
+        ),
         titleMedium: TextStyle(fontWeight: FontWeight.w700),
       ),
     );

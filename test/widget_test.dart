@@ -14,8 +14,8 @@ void main() {
         child: const BookHubApp(),
       ),
     );
-    expect(find.text('BookHub'), findsOneWidget);
-    expect(find.text('Your reading world'), findsOneWidget);
+    expect(find.text("Amara's library"), findsAtLeastNWidgets(1));
+    expect(find.text('Good evening,'), findsOneWidget);
     expect(find.text('Ask AI'), findsOneWidget);
   });
 }

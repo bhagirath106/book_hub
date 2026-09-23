@@ -8,6 +8,7 @@ class Book {
     this.genre = 'Fiction',
     this.progress = 0,
     this.isAudiobook = false,
+    this.coverColor = 0xffefa936,
   });
   final int id;
   final String title;
@@ -17,4 +18,5 @@ class Book {
   final String genre;
   final double progress;
   final bool isAudiobook;
+  final int coverColor;
 }
