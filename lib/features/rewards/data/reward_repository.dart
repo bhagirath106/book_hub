@@ -13,13 +13,32 @@ class LocalRewardRepository implements RewardRepository {
   final SharedPreferences _prefs;
   static const _balanceKey = 'reward_balance';
   static const _adsKey = 'reward_ads';
+  static const _adsDateKey = 'reward_ads_date';
   static const _sharesKey = 'reward_shares';
+
+  String _today() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-'
+        '${now.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<int> _adsToday() async {
+    final today = _today();
+    if (_prefs.getString(_adsDateKey) != today) {
+      await _prefs.setString(_adsDateKey, today);
+      await _prefs.setInt(_adsKey, 0);
+      return 0;
+    }
+    return _prefs.getInt(_adsKey) ?? 0;
+  }
+
   @override
   Future<int> balance() async =>
       _prefs.getInt(_balanceKey) ?? RewardRules.initialCoins;
+
   @override
   Future<int> completeAd() async {
-    final ads = _prefs.getInt(_adsKey) ?? 0;
+    final ads = await _adsToday();
     if (ads >= RewardRules.maxAdsPerDay) return balance();
     final next = (await balance()) + RewardRules.adCoins;
     await _prefs.setInt(_adsKey, ads + 1);

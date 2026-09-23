@@ -133,7 +133,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 190,
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (_, __) => const EmptyState(
+            error: (_, _) => const EmptyState(
               title: 'Offline mode',
               message: 'Saved books are still available.',
             ),
@@ -142,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                separatorBuilder: (_, _) => const SizedBox(width: 16),
                 itemBuilder: (_, index) => BookCard(
                   book: items[index],
                   onTap: () => context.push('/books/${items[index].id}'),

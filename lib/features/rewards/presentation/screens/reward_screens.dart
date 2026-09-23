@@ -82,7 +82,10 @@ class RewardsScreen extends ConsumerWidget {
                 'First five qualifying shares earn 500 coins',
               ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () {},
+              onTap: () async {
+                await ref.read(rewardRepositoryProvider).qualifyShare();
+                ref.invalidate(rewardBalanceProvider);
+              },
             ),
           ),
         ],
