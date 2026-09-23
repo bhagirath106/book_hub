@@ -18,7 +18,7 @@ class SearchResultsScreen extends ConsumerWidget {
       ),
       body: results.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const EmptyState(
+        error: (err, stack) => const EmptyState(
           title: 'Search unavailable',
           message: 'Check your connection and try again.',
         ),
@@ -31,7 +31,8 @@ class SearchResultsScreen extends ConsumerWidget {
             : ListView.separated(
                 padding: const EdgeInsets.all(20),
                 itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (_, i) => _BookListTile(
                   book: items[i],
                   onTap: () => context.push('/books/${items[i].id}'),
@@ -112,10 +113,11 @@ class BookDetailsScreen extends ConsumerWidget {
     return FutureBuilder<Book?>(
       future: book,
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
+        }
         final item = snapshot.data!;
         return Scaffold(
           appBar: AppBar(

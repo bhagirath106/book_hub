@@ -11,77 +11,125 @@ import '../../features/notifications/presentation/screens/notification_screens.d
 final appRouter = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
-    GoRoute(path: '/auth/login', builder: (_, __) => const LoginScreen()),
-    GoRoute(path: '/auth/register', builder: (_, __) => const RegisterScreen()),
+    GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+    GoRoute(
+      path: '/auth/login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/auth/register',
+      builder: (context, state) => const RegisterScreen(),
+    ),
     GoRoute(
       path: '/auth/forgot-password',
-      builder: (_, __) => const ForgotPasswordScreen(),
+      builder: (context, state) => const ForgotPasswordScreen(),
     ),
-    GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
-    GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-    GoRoute(path: '/discover', builder: (_, __) => const DiscoverScreen()),
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+    GoRoute(
+      path: '/discover',
+      builder: (context, state) => const DiscoverScreen(),
+    ),
     GoRoute(
       path: '/filters',
-      builder: (_, __) => const AdvancedFiltersScreen(),
+      builder: (context, state) => const AdvancedFiltersScreen(),
     ),
     GoRoute(
       path: '/search',
-      builder: (_, state) =>
+      builder: (context, state) =>
           SearchResultsScreen(query: state.uri.queryParameters['q'] ?? ''),
     ),
     GoRoute(
       path: '/books/:id',
-      builder: (_, state) => BookDetailsScreen(
+      builder: (context, state) => BookDetailsScreen(
         bookId: int.tryParse(state.pathParameters['id'] ?? '') ?? 1,
       ),
     ),
     GoRoute(
       path: '/reader/:id',
-      builder: (_, state) => ReaderScreen(
+      builder: (context, state) => ReaderScreen(
         bookId: int.tryParse(state.pathParameters['id'] ?? '') ?? 1,
       ),
     ),
-    GoRoute(path: '/audiobooks', builder: (_, __) => const AudiobooksScreen()),
+    GoRoute(
+      path: '/audiobooks',
+      builder: (context, state) => const AudiobooksScreen(),
+    ),
     GoRoute(
       path: '/audiobook/player',
-      builder: (_, __) => const AudiobookPlayerScreen(),
+      builder: (context, state) => const AudiobookPlayerScreen(),
     ),
-    GoRoute(path: '/library', builder: (_, __) => const LibraryScreen()),
-    GoRoute(path: '/favorites', builder: (_, __) => const FavoritesScreen()),
-    GoRoute(path: '/history', builder: (_, __) => const ReadingHistoryScreen()),
+    GoRoute(
+      path: '/library',
+      builder: (context, state) => const LibraryScreen(),
+    ),
+    GoRoute(
+      path: '/favorites',
+      builder: (context, state) => const FavoritesScreen(),
+    ),
+    GoRoute(
+      path: '/history',
+      builder: (context, state) => const ReadingHistoryScreen(),
+    ),
     GoRoute(
       path: '/analytics',
-      builder: (_, __) => const ReadingAnalyticsScreen(),
+      builder: (context, state) => const ReadingAnalyticsScreen(),
     ),
-    GoRoute(path: '/community', builder: (_, __) => const CommunityHubScreen()),
+    GoRoute(
+      path: '/community',
+      builder: (context, state) => const CommunityHubScreen(),
+    ),
     GoRoute(
       path: '/community/group',
-      builder: (_, __) => const GroupDetailsScreen(),
+      builder: (context, state) => const GroupDetailsScreen(),
     ),
-    GoRoute(path: '/chat', builder: (_, __) => const ChatScreen()),
-    GoRoute(path: '/voice-chat', builder: (_, __) => const VoiceChatScreen()),
-    GoRoute(path: '/study-room', builder: (_, __) => const StudyRoomScreen()),
-    GoRoute(path: '/ai', builder: (_, __) => const AIAssistantScreen()),
+    GoRoute(path: '/chat', builder: (context, state) => const ChatScreen()),
+    GoRoute(
+      path: '/voice-chat',
+      builder: (context, state) => const VoiceChatScreen(),
+    ),
+    GoRoute(
+      path: '/study-room',
+      builder: (context, state) => const StudyRoomScreen(),
+    ),
+    GoRoute(
+      path: '/ai',
+      builder: (context, state) => const AIAssistantScreen(),
+    ),
     GoRoute(
       path: '/ai/voice',
-      builder: (_, __) => const AIVoiceAssistantScreen(),
+      builder: (context, state) => const AIVoiceAssistantScreen(),
     ),
     GoRoute(
       path: '/notifications',
-      builder: (_, __) => const NotificationsScreen(),
+      builder: (context, state) => const NotificationsScreen(),
     ),
-    GoRoute(path: '/rewards', builder: (_, __) => const RewardsScreen()),
-    GoRoute(path: '/rewards/ad', builder: (_, __) => const RewardedAdScreen()),
-    GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
-    GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+    GoRoute(
+      path: '/rewards',
+      builder: (context, state) => const RewardsScreen(),
+    ),
+    GoRoute(
+      path: '/rewards/ad',
+      builder: (context, state) => const RewardedAdScreen(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
+    ),
     GoRoute(
       path: '/settings/theme',
-      builder: (_, __) => const ThemeSelectionScreen(),
+      builder: (context, state) => const ThemeSelectionScreen(),
     ),
     GoRoute(
       path: '/settings/language',
-      builder: (_, __) => const LanguageSelectionScreen(),
+      builder: (context, state) => const LanguageSelectionScreen(),
     ),
   ],
 );

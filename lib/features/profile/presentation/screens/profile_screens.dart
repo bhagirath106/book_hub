@@ -130,8 +130,10 @@ class _ChoiceScreen extends StatelessWidget {
     body: Column(
       children: values
           .map(
+            // ignore: deprecated_member_use
             (value) => RadioListTile<String>(
               value: value,
+              // ignore: deprecated_member_use
               groupValue: selected,
               title: Text(
                 value == 'en'
@@ -140,6 +142,7 @@ class _ChoiceScreen extends StatelessWidget {
                     ? 'Hindi'
                     : value[0].toUpperCase() + value.substring(1),
               ),
+              // ignore: deprecated_member_use
               onChanged: (next) {
                 if (next != null) onSelected(next);
               },

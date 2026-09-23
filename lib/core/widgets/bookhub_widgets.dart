@@ -45,7 +45,8 @@ class BookCard extends StatelessWidget {
                     : Image.network(
                         book.coverUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const _CoverFallback(),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const _CoverFallback(),
                       ),
               ),
             ),

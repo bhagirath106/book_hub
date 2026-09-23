@@ -61,7 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 190,
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (_, __) => const EmptyState(
+            error: (err, stack) => const EmptyState(
               title: 'Offline mode',
               message: 'Your saved reading world is still available.',
             ),
@@ -70,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                separatorBuilder: (context, index) => const SizedBox(width: 16),
                 itemBuilder: (_, index) => BookCard(
                   book: items[index],
                   onTap: () => context.push('/books/${items[index].id}'),
@@ -298,7 +298,7 @@ class DiscoverScreen extends ConsumerWidget {
                 ),
               ),
               loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const EmptyState(
+              error: (err, stack) => const EmptyState(
                 title: 'No connection',
                 message: 'Try again when you are online.',
               ),

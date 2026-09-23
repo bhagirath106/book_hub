@@ -52,7 +52,7 @@ class RewardsScreen extends ConsumerWidget {
                 ),
                 loading: () =>
                     const CircularProgressIndicator(color: Colors.white),
-                error: (_, __) => const Text(
+                error: (err, stack) => const Text(
                   'Balance unavailable',
                   style: TextStyle(color: Colors.white),
                 ),
