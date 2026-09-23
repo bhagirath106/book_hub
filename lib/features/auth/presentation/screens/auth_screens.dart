@@ -139,28 +139,12 @@ class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
+    backgroundColor: BookHubColors.darkCanvas,
     body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 92,
-            height: 92,
-            decoration: BoxDecoration(
-              color: BookHubColors.violet,
-              borderRadius: BorderRadius.circular(28),
-            ),
-            child: const Icon(
-              Icons.auto_stories,
-              color: Colors.white,
-              size: 48,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text('BookHub', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 32),
-          const CircularProgressIndicator(),
-        ],
+      child: Image.asset(
+        'assets/branding/bookhub_logo.png',
+        width: 280,
+        semanticLabel: 'BookHub',
       ),
     ),
   );

@@ -45,6 +45,19 @@ sage cover treatments, compact rounded cards, persistent bottom navigation, and
 the floating Ask AI action. Run with `--dart-define=USE_REMOTE_API=true` to use
 the FastAPI book repository; otherwise the same screens use local mock data.
 
+### Launch branding
+
+The native Android and iOS launch screens use the BookHub logo asset at
+`assets/branding/bookhub_logo.png`; the default Flutter launch branding is not
+used. If the asset changes, update the Flutter asset and platform launch image
+copies together, then run `flutter clean` before rebuilding:
+
+```powershell
+flutter clean
+flutter pub get
+flutter run
+```
+
 ## Neon PostgreSQL and Render deployment
 
 The backend is already configured for Neon through `DATABASE_URL`. Do not put
