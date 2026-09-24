@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/bookhub_widgets.dart';
 import '../providers/book_providers.dart';
+import '../providers/audio_player_provider.dart';
 import '../../domain/book.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 
@@ -106,30 +107,35 @@ class _AdvancedFiltersScreenState extends State<AdvancedFiltersScreen> {
 
 class BookDetailsScreen extends ConsumerWidget {
   const BookDetailsScreen({required this.bookId, super.key});
-  final int bookId;
+  final dynamic bookId;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final book = ref.watch(bookRepositoryProvider).getBookDetails(bookId);
-    return FutureBuilder<Book?>(
-      future: book,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final item = snapshot.data!;
-        return Scaffold(
-          appBar: AppBar(
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.favorite_border),
-              ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
-            ],
-          ),
-          body: ListView(
+    final bookAsync = ref.watch(bookDetailsProvider(bookId));
+
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.favorite_border)),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
+        ],
+      ),
+      body: bookAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => const EmptyState(
+          title: 'Details unavailable',
+          message: 'Unable to load book details right now.',
+        ),
+        data: (item) {
+          if (item == null) {
+            return const EmptyState(
+              title: 'Book not found',
+              message: 'The requested book could not be found.',
+              icon: Icons.error_outline,
+            );
+          }
+
+          return ListView(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
             children: [
               Center(
@@ -166,13 +172,23 @@ class BookDetailsScreen extends ConsumerWidget {
                 spacing: 8,
                 children: [
                   Chip(label: Text(item.genre)),
-                  const Chip(label: Text('Available')),
+                  Chip(
+                    label: Text(
+                      item.isEbookAvailable
+                          ? 'Free Ebook'
+                          : item.isAudiobook
+                          ? 'Audiobook'
+                          : 'Available',
+                    ),
+                  ),
                   const Chip(label: Text('4.8 ★')),
                 ],
               ),
               const SizedBox(height: 22),
               Text(
-                item.description,
+                item.description.isNotEmpty
+                    ? item.description
+                    : 'A remarkable book to discover on BookHub.',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 24),
@@ -180,9 +196,20 @@ class BookDetailsScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: FilledButton.icon(
-                      onPressed: () => context.push('/reader/${item.id}'),
-                      icon: const Icon(Icons.menu_book),
-                      label: const Text('Read'),
+                      onPressed: () {
+                        if (item.isAudiobook) {
+                          ref
+                              .read(audioPlayerProvider.notifier)
+                              .loadAudiobook(item);
+                          context.push('/audiobook/player');
+                        } else {
+                          context.push('/reader/${item.id}');
+                        }
+                      },
+                      icon: Icon(
+                        item.isAudiobook ? Icons.headphones : Icons.menu_book,
+                      ),
+                      label: Text(item.isAudiobook ? 'Listen' : 'Read'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -196,16 +223,16 @@ class BookDetailsScreen extends ConsumerWidget {
                 ],
               ),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
 
 class ReaderScreen extends StatefulWidget {
   const ReaderScreen({required this.bookId, super.key});
-  final int bookId;
+  final dynamic bookId;
   @override
   State<ReaderScreen> createState() => _ReaderScreenState();
 }
@@ -216,7 +243,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     appBar: AppBar(
-      title: const Text('The Salt Road'),
+      title: const Text('Book Reader'),
       actions: [
         IconButton(onPressed: () {}, icon: const Icon(Icons.bookmark_border)),
         IconButton(onPressed: () {}, icon: const Icon(Icons.text_fields)),
@@ -228,14 +255,14 @@ class _ReaderScreenState extends State<ReaderScreen> {
         padding: const EdgeInsets.fromLTRB(28, 18, 28, 40),
         children: [
           Text(
-            'Chapter 12',
+            'Chapter 1',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 18),
           Text(
-            'The long road home',
+            'The Journey Begins',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 24),
@@ -245,7 +272,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
           ),
           const SizedBox(height: 20),
           const Text(
-            'She opened the book again, not because the ending had changed, but because she had. Reading was a small way of returning to the places that made us.',
+            'Reading connects us to timeless thoughts and stories across distant worlds.',
             style: TextStyle(fontSize: 19, height: 1.8),
           ),
           const SizedBox(height: 32),
@@ -258,53 +285,190 @@ class _ReaderScreenState extends State<ReaderScreen> {
   );
 }
 
-class AudiobooksScreen extends StatelessWidget {
+class AudiobooksScreen extends ConsumerWidget {
   const AudiobooksScreen({super.key});
+
   @override
-  Widget build(BuildContext context) => const _FeatureScreen(
-    title: 'Audiobooks',
-    icon: Icons.headphones,
-    message: 'Your audio library will appear here.',
-    route: '/audiobook/player',
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final results = ref.watch(bookSearchProvider('audiobook'));
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Audiobooks')),
+      body: results.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => const EmptyState(
+          title: 'Audiobooks unavailable',
+          message: 'Unable to load audiobooks right now.',
+          icon: Icons.headphones,
+        ),
+        data: (items) {
+          final audiobooks = items.where((b) => b.isAudiobook).toList();
+          if (audiobooks.isEmpty) {
+            return const EmptyState(
+              title: 'No Audiobooks',
+              message: 'Explore public domain audiobooks on LibriVox.',
+              icon: Icons.headphones,
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.all(20),
+            itemCount: audiobooks.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (_, i) {
+              final item = audiobooks[i];
+              return Card(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(12),
+                  leading: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.headphones, size: 28),
+                  ),
+                  title: Text(
+                    item.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text('${item.author}\n${item.genre}'),
+                  isThreeLine: true,
+                  trailing: IconButton(
+                    icon: const Icon(Icons.play_circle_fill, size: 36),
+                    onPressed: () {
+                      ref
+                          .read(audioPlayerProvider.notifier)
+                          .loadAudiobook(item);
+                      context.push('/audiobook/player');
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
 }
 
-class AudiobookPlayerScreen extends StatelessWidget {
+class AudiobookPlayerScreen extends ConsumerWidget {
   const AudiobookPlayerScreen({super.key});
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Now playing')),
-    body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.album, size: 150, color: Colors.deepPurple),
-          const SizedBox(height: 24),
-          Text(
-            'The Salt Road',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const Text('Chapter 12 · 18:42'),
-          const SizedBox(height: 24),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: LinearProgressIndicator(value: .42),
-          ),
-          Row(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final playerState = ref.watch(audioPlayerProvider);
+    final notifier = ref.read(audioPlayerProvider.notifier);
+
+    final book = playerState.currentBook;
+    final currentTrack = playerState.currentTrack;
+
+    final title = currentTrack?.title ?? book?.title ?? 'Now playing';
+    final author = book?.author ?? 'LibriVox Audiobook';
+
+    final pos = playerState.position;
+    final dur = playerState.duration;
+    final progress = (dur.inMilliseconds > 0)
+        ? (pos.inMilliseconds / dur.inMilliseconds).clamp(0.0, 1.0)
+        : 0.0;
+
+    String formatDuration(Duration d) {
+      final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+      return '${d.inHours > 0 ? '${d.inHours}:' : ''}$minutes:$seconds';
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Now playing')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.replay)),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.play_circle, size: 68),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: book?.coverUrl != null
+                      ? Image.network(book!.coverUrl!, fit: BoxFit.cover)
+                      : Container(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          child: const Icon(
+                            Icons.album,
+                            size: 100,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                ),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.forward)),
+              const SizedBox(height: 24),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 6),
+              Text(author, style: Theme.of(context).textTheme.bodyLarge),
+              const SizedBox(height: 24),
+              Slider(
+                value: progress,
+                onChanged: (val) {
+                  final newPos = Duration(
+                    milliseconds: (val * dur.inMilliseconds).round(),
+                  );
+                  notifier.seek(newPos);
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(formatDuration(pos)),
+                    Text(formatDuration(dur)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    iconSize: 40,
+                    onPressed: notifier.playPrevious,
+                    icon: const Icon(Icons.skip_previous),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    iconSize: 68,
+                    onPressed: notifier.togglePlayPause,
+                    icon: Icon(
+                      playerState.isPlaying
+                          ? Icons.pause_circle_filled
+                          : Icons.play_circle_fill,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    iconSize: 40,
+                    onPressed: notifier.playNext,
+                    icon: const Icon(Icons.skip_next),
+                  ),
+                ],
+              ),
             ],
           ),
-        ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class LibraryScreen extends StatelessWidget {
@@ -399,7 +563,12 @@ class _BookListTile extends StatelessWidget {
           color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: const Icon(Icons.menu_book),
+        child: book.coverUrl != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(book.coverUrl!, fit: BoxFit.cover),
+              )
+            : const Icon(Icons.menu_book),
       ),
       title: Text(
         book.title,

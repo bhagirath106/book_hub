@@ -2,62 +2,92 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/storage/preferences.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
   @override
-  Widget build(BuildContext context) => BookHubScaffold(
-    selectedIndex: 4,
-    title: 'Profile',
-    body: ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        const CircleAvatar(radius: 44, child: Icon(Icons.person, size: 42)),
-        const SizedBox(height: 14),
-        Text(
-          'Reader',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const Text(
-          'Building a world one page at a time.',
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 26),
-        Card(
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: const Text('Settings'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/settings'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.insights_outlined),
-                title: const Text('Reading analytics'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/analytics'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.monetization_on_outlined),
-                title: const Text('Rewards & coins'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/rewards'),
-              ),
-            ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    final username = authState.username ?? 'Reader';
+
+    return BookHubScaffold(
+      selectedIndex: 4,
+      title: 'Profile',
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          const CircleAvatar(radius: 44, child: Icon(Icons.person, size: 42)),
+          const SizedBox(height: 14),
+          Text(
+            username,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
-        ),
-      ],
-    ),
-  );
+          if (authState.isAdmin) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Admin Portal',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+          const Text(
+            'Building a world one page at a time.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 26),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.settings_outlined),
+                  title: const Text('Settings'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/settings'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.insights_outlined),
+                  title: const Text('Reading analytics'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/analytics'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.monetization_on_outlined),
+                  title: const Text('Rewards & coins'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/rewards'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout, color: Colors.red),
+                  title: const Text(
+                    'Log out',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () async {
+                    await ref.read(authNotifierProvider.notifier).logout();
+                    if (context.mounted) {
+                      context.go('/auth/login');
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
     appBar: AppBar(title: const Text('Settings')),
     body: ListView(
       children: [
@@ -79,6 +109,16 @@ class SettingsScreen extends StatelessWidget {
             'Your preferences and reading progress stay on this device',
           ),
           leading: Icon(Icons.cloud_done_outlined),
+        ),
+        ListTile(
+          title: const Text('Log out', style: TextStyle(color: Colors.red)),
+          leading: const Icon(Icons.logout, color: Colors.red),
+          onTap: () async {
+            await ref.read(authNotifierProvider.notifier).logout();
+            if (context.mounted) {
+              context.go('/auth/login');
+            }
+          },
         ),
       ],
     ),

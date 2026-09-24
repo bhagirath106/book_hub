@@ -9,6 +9,7 @@ class BookHubApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
+    final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
       title: 'BookHub',
       debugShowCheckedModeBanner: false,
@@ -19,7 +20,7 @@ class BookHubApp extends ConsumerWidget {
           : mode == 'light'
           ? ThemeMode.light
           : ThemeMode.system,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

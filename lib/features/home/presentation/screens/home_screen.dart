@@ -117,6 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 separatorBuilder: (context, index) => const SizedBox(width: 16),
                 itemBuilder: (_, index) => BookCard(
                   book: items[index],
+                  heroTag: 'recommended-${items[index].id}',
                   onTap: () => context.push('/books/${items[index].id}'),
                 ),
               ),
@@ -145,6 +146,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 separatorBuilder: (_, _) => const SizedBox(width: 16),
                 itemBuilder: (_, index) => BookCard(
                   book: items[index],
+                  heroTag: 'recommended-${items[index].id}',
                   onTap: () => context.push('/books/${items[index].id}'),
                 ),
               ),
@@ -402,6 +404,7 @@ class DiscoverScreen extends ConsumerWidget {
                 ),
                 itemBuilder: (_, i) => BookCard(
                   book: items[i],
+                  heroTag: 'discover-${items[i].id}',
                   onTap: () => context.push('/books/${items[i].id}'),
                 ),
               ),

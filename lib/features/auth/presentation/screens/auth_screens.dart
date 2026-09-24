@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/bookhub_theme.dart';
+import '../providers/auth_provider.dart';
 
 class _AuthScaffold extends StatelessWidget {
   const _AuthScaffold({
@@ -43,20 +45,74 @@ class _AuthScaffold extends StatelessWidget {
   );
 }
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  String? _errorMessage;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    setState(() {
+      _errorMessage = null;
+      _isLoading = true;
+    });
+
+    final success = await ref
+        .read(authNotifierProvider.notifier)
+        .login(_emailController.text, _passwordController.text);
+
+    if (!mounted) return;
+
+    setState(() => _isLoading = false);
+
+    if (success) {
+      context.go('/');
+    } else {
+      setState(() {
+        _errorMessage = 'Invalid email/username or password.';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) => _AuthScaffold(
     title: 'Welcome back',
     subtitle: 'Your next chapter is waiting.',
     child: Column(
       children: [
-        const TextField(decoration: InputDecoration(labelText: 'Email')),
-        const SizedBox(height: 14),
-        const TextField(
-          obscureText: true,
-          decoration: InputDecoration(labelText: 'Password'),
+        TextField(
+          controller: _emailController,
+          decoration: const InputDecoration(labelText: 'Email or Username'),
         ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: _passwordController,
+          obscureText: true,
+          decoration: const InputDecoration(labelText: 'Password'),
+        ),
+        if (_errorMessage != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _errorMessage!,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -67,8 +123,17 @@ class LoginScreen extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: () => context.go('/'),
-            child: const Text('Log in'),
+            onPressed: _isLoading ? null : _handleLogin,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('Log in'),
           ),
         ),
         TextButton(
@@ -80,27 +145,60 @@ class LoginScreen extends StatelessWidget {
   );
 }
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
+  @override
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    final success = await ref
+        .read(authNotifierProvider.notifier)
+        .login(_emailController.text, _passwordController.text);
+    if (mounted && success) {
+      context.go('/');
+    }
+  }
+
   @override
   Widget build(BuildContext context) => _AuthScaffold(
     title: 'Create your world',
     subtitle: 'Join readers discovering more together.',
     child: Column(
       children: [
-        const TextField(decoration: InputDecoration(labelText: 'Display name')),
+        TextField(
+          controller: _nameController,
+          decoration: const InputDecoration(labelText: 'Display name'),
+        ),
         const SizedBox(height: 14),
-        const TextField(decoration: InputDecoration(labelText: 'Email')),
+        TextField(
+          controller: _emailController,
+          decoration: const InputDecoration(labelText: 'Email'),
+        ),
         const SizedBox(height: 14),
-        const TextField(
+        TextField(
+          controller: _passwordController,
           obscureText: true,
-          decoration: InputDecoration(labelText: 'Password'),
+          decoration: const InputDecoration(labelText: 'Password'),
         ),
         const SizedBox(height: 22),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: () => context.go('/'),
+            onPressed: _handleRegister,
             child: const Text('Create account'),
           ),
         ),

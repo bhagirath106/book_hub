@@ -25,7 +25,7 @@ class FastApiBookRepository implements BookRepository {
   }
 
   @override
-  Future<Book?> getBookDetails(int id) async {
+  Future<Book?> getBookDetails(dynamic id) async {
     final item = await _client.get('/api/v1/books/$id') as Map<String, dynamic>;
     final result = await searchBooks(item['title'] as String);
     for (final book in result) {

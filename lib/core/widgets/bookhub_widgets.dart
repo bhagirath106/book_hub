@@ -18,9 +18,10 @@ class SectionHeader extends StatelessWidget {
 }
 
 class BookCard extends StatelessWidget {
-  const BookCard({required this.book, this.onTap, super.key});
+  const BookCard({required this.book, this.onTap, this.heroTag, super.key});
   final Book book;
   final VoidCallback? onTap;
+  final Object? heroTag;
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
@@ -31,7 +32,7 @@ class BookCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Hero(
-            tag: 'book-${book.id}',
+            tag: heroTag ?? 'book-${book.id}',
             child: ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: SizedBox(
